@@ -12,11 +12,6 @@
   (.apply (.-log js/console) js/console
           (into-array (map to-string args))))
 
-(defn run []
-  (bind-timer)
-  (bind-timer2)
-  (log "I'm running!"))
-
 (defn bind-timer []
   (fj/mapE log (fj/clicksE "start-timer")))
 
@@ -27,4 +22,7 @@
       (.insertValueE "timer" "innerHTML")
       ))
 
-(run)
+(defn ^:export run []
+  (bind-timer)
+  (bind-timer2)
+  (log "I'm running!"))
