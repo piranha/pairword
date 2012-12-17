@@ -1,16 +1,7 @@
 (ns ^{:doc "Pairwords entry point"}
   pairwords.core
-  (:require [flapjax :as fj]))
-
-(defn- to-string [obj]
-  (if (and (satisfies? cljs.core.ISeqable obj)
-           (not (instance? js/String obj)))
-    (pr-str obj)
-    obj))
-
-(defn log [& args]
-  (.apply (.-log js/console) js/console
-          (into-array (map to-string args))))
+  (:require [flapjax :as fj]
+            [pairwords.util :refer [log]]))
 
 (defn bind-timer []
   (fj/mapE log (fj/clicksE "start-timer")))
@@ -19,7 +10,7 @@
   (-> "start-timer"
       fj/clicksE
       (.constantE 42)
-      (.insertValueE "timer" "innerHTML")
+      (fj/insertValueE "timer" "innerHTML")
       ))
 
 (defn ^:export run []
