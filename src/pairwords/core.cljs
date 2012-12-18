@@ -25,6 +25,11 @@
       (fj/insertValueB "text" "style" "display")))
 
 (defn ^:export run []
+  (me/on world []
+         (fn [d p] (.log js/console
+                         (pr-str (dissoc d :handlers))
+                         (pr-str p))))
+
   (me/assoc-in world [:value]
                (-> (.getElementById js/document "input") (.-value)))
   (-> (fj/extractValueE "input")
