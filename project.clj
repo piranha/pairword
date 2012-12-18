@@ -1,7 +1,8 @@
 (defproject pairwords "0.0.1"
   :description "Explaining words in pairs"
   :plugins [[lein-cljsbuild "0.2.10" :hooks false]]
-  :dependencies [[org.clojure/clojure "1.4.0"]]
+  :dependencies [[org.clojure/clojure "1.4.0"]
+                 [solovyov/mesto "0.3.2"]]
   :cljsbuild {:builds
               {
                :main {
