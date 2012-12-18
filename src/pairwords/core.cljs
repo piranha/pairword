@@ -4,7 +4,7 @@
             [pairwords.util :refer [log]]))
 
 (defn prevent-default [es]
-  (fj/mapE #(.preventDefault %) es))
+  (fj/mapE #(do (.preventDefault %) %) es))
 
 
 ;; event stream here works and behavior runs with initial value,
