@@ -13,6 +13,7 @@
   (-> (fj/clicksE "show")
       (prevent-default)
       (fj/collectE false (fn [_ val] (not val)))
+      (.mapE #(do (log %) %))
       (fj/startsWith false)
       (fj/ifB "block" "none")
       ;; should be "text" "style" "display" to change visibility
