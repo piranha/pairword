@@ -24,13 +24,13 @@
       (fj/ifB "block" "none")
       (fj/insertValueB "text" "style" "display")))
 
-(defn storage-show []
-  (-> (storageB world [:info])
-      (fj/insertValueB "storage-info" "innerHTML")))
-
 (defn ^:export run []
+  (me/assoc-in world [:value]
+               (-> (.getElementById js/document "input") (.-value)))
+  (-> (fj/extractValueE "input")
+      (.mapE #(me/assoc-in world [:value] %)))
+  (-> (storageB world [:value])
+      (fj/insertValueB "display-value" "innerHTML"))
+
   (text-show-hide)
-  (me/assoc-in world [:info] "test")
-  (storage-show)
-  (me/assoc-in world [:info] "ololoe")
   (log "I'm running!"))
