@@ -2,7 +2,7 @@
   pairwords.core
   (:require [flapjax :as fj]
             [solovyov.mesto :as me]
-            [pairwords.util :refer [log storageB]]))
+            [pairwords.util :refer [log storageB storeB]]))
 
 (def world (atom {}))
 
@@ -30,9 +30,8 @@
                          (pr-str (dissoc d :handlers))
                          (pr-str p))))
 
-  (me/assoc-in world [:value] "ololoe")
-  (-> (fj/extractValueE "input")
-      (.mapE #(me/assoc-in world [:value] %)))
+  (-> (fj/extractValueB "input")
+      (storeB world [:value]))
   (let [b (storageB world [:value])]
     (fj/insertValueB b "display-value" "innerHTML")
     (fj/insertValueB b "input" "value"))

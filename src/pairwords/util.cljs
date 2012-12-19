@@ -21,3 +21,10 @@
            (fn [data path]
              (.sendEvent es data)))
     (fj/startsWith es init)))
+
+
+(defn storeB [b world path]
+  (let [current (fj/valueNow b)
+        es (fj/changes b)]
+    (me/assoc-in world path current)
+    (.mapE es #(me/assoc-in world path %))))
