@@ -28,3 +28,13 @@
         es (fj/changes b)]
     (me/assoc-in world path current)
     (.mapE es #(me/assoc-in world path %))))
+
+
+(defn finiteTimerE
+  ([delay] (finiteTimerE delay 100))
+  ([delay interval]
+     (let [timer (fj/timerE interval)]
+       (-> timer
+           (fj/delayE delay)
+           (.mapE #(fj/disableTimer timer)))
+       timer)))
