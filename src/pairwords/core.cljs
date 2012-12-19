@@ -30,12 +30,12 @@
                          (pr-str (dissoc d :handlers))
                          (pr-str p))))
 
-  (me/assoc-in world [:value]
-               (-> (.getElementById js/document "input") (.-value)))
+  (me/assoc-in world [:value] "ololoe")
   (-> (fj/extractValueE "input")
       (.mapE #(me/assoc-in world [:value] %)))
-  (-> (storageB world [:value])
-      (fj/insertValueB "display-value" "innerHTML"))
+  (let [b (storageB world [:value])]
+    (fj/insertValueB b "display-value" "innerHTML")
+    (fj/insertValueB b "input" "value"))
 
   (text-show-hide)
   (log "I'm running!"))
