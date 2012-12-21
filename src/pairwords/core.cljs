@@ -2,7 +2,8 @@
   pairwords.core
   (:require [flapjax :as fj]
             [solovyov.mesto :as me]
-            [pairwords.util :refer [log storageB storeB finiteTimerE]]))
+            [pairwords.util :refer [log storageB storeB finiteTimerE]]
+            [pairwords.game :refer [init-game]]))
 
 (def world (atom {}))
 
@@ -41,4 +42,5 @@
     (fj/insertValueB b "input" "value"))
 
   (text-show-hide)
+  (init-game world)
   (log "I'm running!"))

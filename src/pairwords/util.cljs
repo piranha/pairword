@@ -38,3 +38,8 @@
            (fj/delayE delay)
            (.mapE #(fj/disableTimer timer)))
        timer)))
+
+(defn list2li [v]
+  (if (empty? v)
+    ""
+    (apply + (map #(+ "<li>" % "</li>") v))))
