@@ -40,7 +40,7 @@
        timer)))
 
 
-(defn removeValueOnEventE [e id]
+(defn popValueOnEventE [e id]
   (let [valueE (fj/snapshotE e (fj/extractValueB id))]
     (-> valueE
      (fj/constantE "")
