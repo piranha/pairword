@@ -2,7 +2,7 @@
   pairwords.core
   (:require [flapjax :as fj]
             [solovyov.mesto :as me]
-            [pairwords.util :refer [log logE storageB storeB finiteTimerE]]
+            [pairwords.util :refer [log logE storageB storeB finiteTimerB]]
             [pairwords.game :refer [init-game]]))
 
 (def world (atom {}))
@@ -22,7 +22,8 @@
       (fj/insertValueB "text" "style" "display")))
 
 (defn ^:export run-timer [delay]
-  (-> (finiteTimerE delay)
+  (-> (finiteTimerB delay)
+      (fj/changes)
       (logE)))
 
 (defn ^:export run []

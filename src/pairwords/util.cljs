@@ -33,14 +33,17 @@
     (.mapE es #(me/assoc-in world path %))))
 
 
-(defn finiteTimerE
-  ([delay] (finiteTimerE delay 100))
+(defn finiteTimerB
+  ([delay] (finiteTimerB delay 100))
   ([delay interval]
-     (let [timer (fj/timerE interval)]
+     (let [timer (fj/timerB interval)
+           end (+ delay (.valueNow timer))]
        (-> timer
+           (fj/changes)
+           (fj/onceE)
            (fj/delayE delay)
            (.mapE #(fj/disableTimer timer)))
-       timer)))
+       (fj/liftB #(- end %) timer))))
 
 
 (defn popValueOnEventE [e id]
