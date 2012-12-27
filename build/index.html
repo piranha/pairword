@@ -13,14 +13,24 @@
 
   <hr>
 
-  <div id="display-value"></div><br>
-  <input id="input" value="something">
+  <h3>Game state</h3>
+  <strong id="game-state"></strong>
 
   <hr>
 
-  <ul id="names-list"></ul>
-  <input id="name-input" placeholder="Enter name">
-  <input id="add-player" type="button" value="Add player">
+  <div id="game-setup">
+    <ul id="names-list"></ul>
+    <input id="name-input" placeholder="Enter name">
+    <input id="add-player" type="button" value="Add player">
+    <input id="start-game" type="button" value="Start game">
+  </div>
+
+  <hr>
+
+  <div id="round-start">
+    <ul id="current-players"></ul>
+    <input id="start-round" type="button" value="Start round">
+  </div>
 
   <script type="text/javascript" src="pairwords.js"></script>
   <script>

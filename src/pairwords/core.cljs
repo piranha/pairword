@@ -2,7 +2,7 @@
   pairwords.core
   (:require [flapjax :as fj]
             [solovyov.mesto :as me]
-            [pairwords.util :refer [log storageB storeB finiteTimerE]]
+            [pairwords.util :refer [log logE storageB storeB finiteTimerE]]
             [pairwords.game :refer [init-game]]))
 
 (def world (atom {}))
@@ -10,36 +10,26 @@
 (defn prevent-default [es]
   (fj/mapE #(do (.preventDefault %) %) es))
 
-(defn log-e [e]
-  (log e)
-  e)
-
 ;; event stream here works and behavior runs with initial value,
 ;; but afterwards any events do not affect result. Why?
 (defn text-show-hide []
   (-> (fj/clicksE "show")
       (prevent-default)
       (fj/collectE false (fn [_ val] (not val)))
-      (.mapE log-e)
+      (logE)
       (fj/startsWith false)
       (fj/ifB "block" "none")
       (fj/insertValueB "text" "style" "display")))
 
 (defn ^:export run-timer [delay]
   (-> (finiteTimerE delay)
-      (.mapE log-e)))
+      (logE)))
 
 (defn ^:export run []
   (me/on world []
          (fn [d p] (.log js/console
                          (pr-str (dissoc d :handlers))
                          (pr-str p))))
-
-  (-> (fj/extractValueB "input")
-      (storeB world [:value]))
-  (let [b (storageB world [:value])]
-    (fj/insertValueB b "display-value" "innerHTML")
-    (fj/insertValueB b "input" "value"))
 
   (text-show-hide)
   (init-game world)

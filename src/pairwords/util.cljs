@@ -13,6 +13,9 @@
   (.apply (.-log js/console) js/console
           (into-array (map to-string args))))
 
+(defn logE [e]
+  (fj/mapE log e)
+  e)
 
 (defn storageB [world path]
   (let [init (me/get-in @world path)
