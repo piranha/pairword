@@ -38,3 +38,11 @@
            (fj/delayE delay)
            (.mapE #(fj/disableTimer timer)))
        timer)))
+
+
+(defn removeValueOnEventE [e id]
+  (let [valueE (fj/snapshotE e (fj/extractValueB id))]
+    (-> valueE
+     (fj/constantE "")
+     (fj/insertValueE id "value"))
+    valueE))
