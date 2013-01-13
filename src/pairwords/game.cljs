@@ -2,7 +2,7 @@
   (:require [solovyov.mesto :as me]
             [flapjax :as fj]
             [pairwords.util :refer [logE storageB popValueOnEventE finiteTimerB]]
-            [pairwords.templates :refer [list2li msec2str]]))
+            [pairwords.templates :refer [list2li msec2str player-list-template]]))
 
 (def game-length 2000) ; milliseconds
 
@@ -39,8 +39,9 @@
       (.mapE #(me/assoc-in world [:game :state] :end-round)))
 
   (let [players (storageB world [:game :players])
-        li-s (fj/liftB list2li players)]
-    (fj/insertValueB li-s "names-list" "innerHTML"))
+        html (fj/liftB player-list-template players)
+        string (fj/liftB #(-> % .-firstChild .-innerHTML) html)]
+    (fj/insertValueB string "names-list" "innerHTML"))
 
   (fj/insertValueB (storageB world [:game :state])
                    "game-state" "innerHTML"))
