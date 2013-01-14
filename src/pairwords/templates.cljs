@@ -20,6 +20,7 @@
 ;;   "<ul></ul>"
 ;;   "ul" [:list users #{:id}])
 
+;; https://github.com/robert-stuttaford/demo-enfocus-pubsub-remote/blob/master/src-cljs/depr/view.cljs
 
 (em/deftemplate player-template :compiled "templates/player.html"
   [player]

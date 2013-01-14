@@ -33,6 +33,19 @@
     (.mapE es #(me/assoc-in world path %))))
 
 
+(defn atomB [data]
+  (let [init @data
+        es (fj/receiverE)]
+    (add-watch atom "should-be-unique?"
+               (fn [key ref old new]
+                 (.sendEvent es new)))
+    (fj/startsWith es init)))
+
+
+(defn narrowB [b path]
+  (fj/liftB #(get-in % path) b))
+
+
 (defn finiteTimerB
   ([delay] (finiteTimerB delay 100))
   ([delay interval]
