@@ -1,6 +1,9 @@
 (ns pairwords.templates
   (:require-macros [enfocus.macros :as em])
-  (:require [enfocus.core :as ef]))
+  (:require [enfocus.core :as ef]
+            [domina]
+            [flapjax :as fj]
+            [pairwords.util :refer [log]]))
 
 
 (defn list2li [v]
@@ -22,10 +25,20 @@
 
 ;; https://github.com/robert-stuttaford/demo-enfocus-pubsub-remote/blob/master/src-cljs/depr/view.cljs
 
+(defn content [b]
+  (fn [nodes]
+    (doseq [el (domina/nodes nodes)]
+      (fj/insertValueB b el "innerHTML"))))
+
 (em/deftemplate player-template :compiled "templates/player.html"
   [player]
-  ["li"] (em/content player))
+  ["li"] (ef/en-content player))
 
 (em/deftemplate player-list-template :compiled "templates/player-list.html"
   [players]
-  ["ul"] (apply ef/en-content (map player-template players)))
+  ["ul"] (apply ef/en-content (map player-template players))
+  )
+
+(em/deftemplate player-list-templateB :compiled "templates/player-list-count.html"
+  [playersB]
+  [".count"] (content (fj/liftB #(count %) playersB)))
