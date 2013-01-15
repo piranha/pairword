@@ -40,13 +40,8 @@
       (.mapE #(me/assoc-in world [:game :state] :end-round)))
 
   (let [players (storageB world [:game :players])
-        html (fj/liftB player-list-template players)
-        string (fj/liftB #(-> % .-firstChild .-innerHTML) html)]
-    (fj/insertValueB string "names-list" "innerHTML"))
-
-  (let [players (storageB world [:game :players])
         frag (player-list-templateB players)
-        parent (.getElementById js/document "name-count")]
+        parent (.getElementById js/document "player-list")]
     (.appendChild parent frag))
 
   (fj/insertValueB (storageB world [:game :state])
