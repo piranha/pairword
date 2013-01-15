@@ -14,7 +14,10 @@
   (me/assoc-in world [:game :players] [])
   (me/assoc-in world [:game :state] :entering-players)
 
-  (-> (fj/clicksE "add-player")
+  (-> (fj/mergeE
+       (fj/clicksE "add-player")
+       (-> (fj/extractEventE "name-input" "keyup")
+           (fj/filterE #(= (.-keyCode %) 13))))
       (popValueOnEventE "name-input")
       (fj/filterE #(not= % "")) ; filters empty inputs
       (.mapE #(me/update-in world [:game :players] conj %)))
