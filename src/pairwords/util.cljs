@@ -65,3 +65,8 @@
      (fj/constantE "")
      (fj/insertValueE id "value"))
     valueE))
+
+
+(defn appendTo [id frag]
+  (let [parent (.getElementById js/document id)]
+    (.appendChild parent frag)))

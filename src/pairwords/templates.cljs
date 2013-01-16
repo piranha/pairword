@@ -1,9 +1,11 @@
 (ns pairwords.templates
-  (:require-macros [enfocus.macros :as em])
+  (:refer-clojure :exclude [list])
+  (:require-macros [enfocus.macros :as em]
+                   [pairwords.macros :refer [defproc]])
   (:require [enfocus.core :as ef]
             [domina]
             [flapjax :as fj]
-            [pairwords.util :refer [log]]))
+            [pairwords.util :refer [log narrowB]]))
 
 
 (defn list2li [v]
@@ -14,39 +16,76 @@
 (defn msec2str [msec]
   (format "%.1f" (/ msec 1000.)))
 
-;; improvement needed:
-;;   (defproc name [el b ....] & body)
-;; ->
-;;   (defn name [b ..] (fn [nodes] (doseq [el (domina/nodes nodes)] & body)))
+;;; template processors
 
-(defn content [b]
-  (fn [nodes]
-    (doseq [el (domina/nodes nodes)]
-      (fj/insertValueB b el "innerHTML"))))
+(defproc append [el fragment]
+  (.appendChild el fragment))
+
+(defproc content [el b]
+  (fj/insertValueB b el "innerHTML"))
+
+(defproc attr [el b name-path value]
+  (apply fj/insertValueB (fj/liftB #(if % value "") b)
+         el (.split name-path ".")))
 
 ;; idea for the future: supply [optional] set of keys to identify items in list,
 ;; so that it's possible to track re-ordering to minimize reflow/rendering/etc
-(defn list [b item-template]
-  (fn [nodes]
-    (let [countB (fj/liftB #(count %) b)]
-      (doseq [el (domina/nodes nodes)]
-        (fj/liftB (fn [n]
-                    ;; TODO: this is of course not fun at all, at the very
-                    ;; minimum it should not delete elements which are still
-                    ;; used
-                    (aset el "innerHTML" "")
-                    (doseq [i (range n)
-                            :let [itemB (fj/liftB #(nth % i) b)]]
-                      (.appendChild el (item-template itemB))))
-                  countB)))))
+(defproc list [el b item-template]
+  (let [countB (fj/liftB count b)]
+    (fj/liftB
+     (fn [n]
+       ;; TODO: this is of course not fun at all, at the very
+       ;; minimum it should not delete elements which are still
+       ;; used
+       (aset el "innerHTML" "")
+       (doseq [i (range n)
+               :let [itemB (fj/liftB #(nth % i) b)]]
+         (.appendChild el (item-template itemB))))
+     countB)))
 
+;;; state
 
-(em/deftemplate player-templateB :compiled "templates/player.html"
+(em/deftemplate game-state :compiled "templates/game-state.html"
+  [gameB]
+  ["strong"] (content (narrowB gameB [:state])))
+
+;;; setup
+
+(em/deftemplate player :compiled "templates/player.html"
   [playerB]
   ["li"] (content playerB))
 
 
-(em/deftemplate player-list-templateB :compiled "templates/player-list.html"
+(em/deftemplate player-list :compiled "templates/player-list.html"
   [playersB]
-  [".count"] (content (fj/liftB #(count %) playersB))
-  ["ul"] (list playersB player-templateB))
+  [".count"] (content (fj/liftB count playersB))
+  ["ul"] (list playersB player))
+
+
+(em/deftemplate setup-form :compiled "templates/setup-form.html"
+  [gameB])
+
+(em/deftemplate game-setup :compiled "templates/game-setup.html"
+  [gameB]
+  [":first-child"] (attr
+                    (fj/liftB #(not= :entering-players (% :state)) gameB)
+                    "style.display" "none")
+  [".game-setup"] (append (player-list (narrowB gameB [:players])))
+  [".game-setup"] (append (setup-form gameB)))
+
+
+;;; round
+
+(em/deftemplate game-round :compiled "templates/round.html"
+  [gameB]
+  [":first-child"] (attr
+                    (fj/liftB #(= :entering-players (% :state)) gameB)
+                    "style.display" "none"))
+
+;;; game
+
+(em/deftemplate game :compiled "templates/game.html"
+  [gameB]
+  [".state"] (append (game-state gameB))
+  [".tabs"] (append (game-setup gameB))
+  [".tabs"] (append (game-round gameB)))
