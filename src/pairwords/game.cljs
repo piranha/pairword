@@ -2,7 +2,7 @@
   (:require [solovyov.mesto :as me]
             [flapjax :as fj]
             [pairwords.util :refer [logE storageB popValueOnEventE finiteTimerB
-                                    appendTo]]
+                                    appendTo log]]
             [pairwords.templates :refer [list2li msec2str player-list-template
                                          player-list-templateB]
              :as t]))
@@ -32,8 +32,12 @@
   ;;     (fj/filterE #(<= 3 (count (me/get-in @world [:game :players]))))
   ;;     (.mapE #(me/assoc-in world [:game :state] :starting-round)))
 
-  (appendTo "game"
-            (t/game (storageB world [:game])))
+  (let [gameB (storageB world [:game])
+        form (t/setup-form gameB)
+        formB (t/setup-form-b form)
+        frag (t/game gameB form)]
+    (fj/liftB #(.log js/console (pr-str %)) formB)
+    (appendTo "game" frag))
   
   ;; (-> (storageB world [:game :state])
   ;;     (fj/changes)

@@ -46,6 +46,17 @@
   (fj/liftB #(get-in % path) b))
 
 
+;; идея - бехавиор всë время фолс, после ивента и еще 1 мс (минимальный
+;; промежуток времени) - тру
+(defn extractEventB [el event-name]
+  (let [es (fj/receiverE)]
+    (.addEventListener el event-name
+                       (fn [e]
+                         (.sendEvent es true)
+                         (js/requestAnimationFrame #(.sendEvent es false))))
+    (fj/startsWith es false)))
+
+
 (defn finiteTimerB
   ([delay] (finiteTimerB delay 100))
   ([delay interval]

@@ -3,9 +3,9 @@
   (:require-macros [enfocus.macros :as em]
                    [pairwords.macros :refer [defproc]])
   (:require [enfocus.core :as ef]
-            [domina]
+            [domina.css :as css]
             [flapjax :as fj]
-            [pairwords.util :refer [log narrowB]]))
+            [pairwords.util :refer [log narrowB extractEventB]]))
 
 
 (defn list2li [v]
@@ -15,6 +15,12 @@
 
 (defn msec2str [msec]
   (format "%.1f" (/ msec 1000.)))
+
+(defn sel
+  ([expr]
+     (domina/single-node (css/sel expr)))
+  ([base expr]
+     (domina/single-node (css/sel base expr))))
 
 ;;; template processors
 
@@ -66,13 +72,21 @@
   [gameB])
 
 (em/deftemplate game-setup :compiled "templates/game-setup.html"
-  [gameB]
+  [gameB form]
   [":first-child"] (attr
                     (fj/liftB #(not= :entering-players (% :state)) gameB)
                     "style.display" "none")
   [".game-setup"] (append (player-list (narrowB gameB [:players])))
-  [".game-setup"] (append (setup-form gameB)))
+  [".game-setup"] (append form))
 
+(defn setup-form-b
+  [frag]
+  (fj/liftB
+   (fn [& args] (apply hash-map args))
+
+   :name (fj/extractValueB (sel frag "[name=name]"))
+   :add-player (extractEventB (sel frag "[name=add]") "click")
+   :start-game (extractEventB (sel frag "[name=start]") "click")))
 
 ;;; round
 
@@ -85,7 +99,7 @@
 ;;; game
 
 (em/deftemplate game :compiled "templates/game.html"
-  [gameB]
+  [gameB form]
   [".state"] (append (game-state gameB))
-  [".tabs"] (append (game-setup gameB))
+  [".tabs"] (append (game-setup gameB form))
   [".tabs"] (append (game-round gameB)))

@@ -20,6 +20,7 @@
                 :compiler {
                  :output-to "build/mini.js"
                  :optimizations :advanced
+                 :externs ["externs/flapjax.js"]
                  :foreign-libs [{:file "http://www.flapjax-lang.org/download/flapjax-2.1.js"
                                  :provides "flapjax"}]}
                 }
