@@ -30,6 +30,9 @@
 (defproc content [el b]
   (fj/insertValueB b el "innerHTML"))
 
+(defproc value [el b]
+  (fj/insertValueB b el "value"))
+
 (defproc attr [el b name-path value]
   (apply fj/insertValueB (fj/liftB #(if % value "") b)
          el (.split name-path ".")))
@@ -69,7 +72,8 @@
 
 
 (em/deftemplate setup-form :compiled "templates/setup-form.html"
-  [gameB])
+  [gameB]
+  ["[name=name]"] (value (narrowB gameB [:name])))
 
 (em/deftemplate game-setup :compiled "templates/game-setup.html"
   [gameB form]
@@ -82,8 +86,7 @@
 (defn setup-form-b
   [frag]
   (fj/liftB
-   (fn [& args] (apply hash-map args))
-
+   hash-map
    :name (fj/extractValueB (sel frag "[name=name]"))
    :add-player (extractEventB (sel frag "[name=add]") "click")
    :start-game (extractEventB (sel frag "[name=start]") "click")))

@@ -2,7 +2,7 @@
   (:require [solovyov.mesto :as me]
             [flapjax :as fj]
             [pairwords.util :refer [logE storageB popValueOnEventE finiteTimerB
-                                    appendTo log]]
+                                    appendTo log narrowB]]
             [pairwords.templates :refer [list2li msec2str player-list-template
                                          player-list-templateB]
              :as t]))
@@ -15,6 +15,7 @@
 (defn init-game [world]
   (me/assoc-in world [:game :players] [])
   (me/assoc-in world [:game :state] :entering-players)
+  (me/assoc-in world [:game :form] {:name ""})
 
   ;;; INFO
   
@@ -32,11 +33,23 @@
   ;;     (fj/filterE #(<= 3 (count (me/get-in @world [:game :players]))))
   ;;     (.mapE #(me/assoc-in world [:game :state] :starting-round)))
 
+  ;; is not working with :add-player! wtf?
+  (me/on world [:game :form :add-player]
+         (fn [data path]
+           (log data path)
+           (log (me/get-in @world [:game :form :name]))
+           ;; (if data
+           ;;   (me/update-in world [:game :players] conj
+           ;;                 (me/get-in @world [:game :form :name]))
+           ;;   (me/assoc-in world [:game :form :name] ""))
+           ))
+  
   (let [gameB (storageB world [:game])
-        form (t/setup-form gameB)
+        form (t/setup-form (narrowB gameB [:form]))
         formB (t/setup-form-b form)
         frag (t/game gameB form)]
-    (fj/liftB #(.log js/console (pr-str %)) formB)
+
+    (fj/liftB #(me/assoc-in world [:game :form] %) formB)
     (appendTo "game" frag))
   
   ;; (-> (storageB world [:game :state])
