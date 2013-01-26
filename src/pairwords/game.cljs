@@ -33,7 +33,8 @@
   ;;     (fj/filterE #(<= 3 (count (me/get-in @world [:game :players]))))
   ;;     (.mapE #(me/assoc-in world [:game :state] :starting-round)))
 
-  ;; is not working with :add-player! wtf?
+  ;; not working because whole [:game :form] is being updated, which means
+  ;; :add-player is not notified :((
   (me/on world [:game :form :add-player]
          (fn [data path]
            (log data path)
