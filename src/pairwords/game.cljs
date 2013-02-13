@@ -2,7 +2,7 @@
   (:require [solovyov.mesto :as me]
             [flapjax :as fj]
             [pairwords.util :refer [logE storageB popValueOnEventE finiteTimerB
-                                    appendTo log narrowB]]
+                                    appendTo log narrowB atomB]]
             [pairwords.templates :refer [list2li msec2str player-list-template
                                          player-list-templateB]
              :as t]))
@@ -18,7 +18,7 @@
   (me/assoc-in world [:game :form] {:name ""})
 
   ;;; INFO
-  
+
   ;;; SETUP
 
   ;; (-> (fj/mergeE
@@ -33,18 +33,16 @@
   ;;     (fj/filterE #(<= 3 (count (me/get-in @world [:game :players]))))
   ;;     (.mapE #(me/assoc-in world [:game :state] :starting-round)))
 
-  ;; not working because whole [:game :form] is being updated, which means
-  ;; :add-player is not notified :((
-  (me/on world [:game :form :add-player]
-         (fn [data path]
-           (log data path)
-           (log (me/get-in @world [:game :form :name]))
-           ;; (if data
-           ;;   (me/update-in world [:game :players] conj
-           ;;                 (me/get-in @world [:game :form :name]))
-           ;;   (me/assoc-in world [:game :form :name] ""))
-           ))
-  
+
+  ;; argh this is wrong and causes recursion
+  ;; also flapjax is a bit of a flopjax
+  (-> (atomB world [:game :form :add-player])
+      (.liftB (fn [data]
+                (when data
+                  (me/update-in world [:game :players] conj
+                                (me/get-in @world [:game :form :name]))
+                  (me/assoc-in world [:game :form :name] "")))))
+
   (let [gameB (storageB world [:game])
         form (t/setup-form (narrowB gameB [:form]))
         formB (t/setup-form-b form)
@@ -52,7 +50,7 @@
 
     (fj/liftB #(me/assoc-in world [:game :form] %) formB)
     (appendTo "game" frag))
-  
+
   ;; (-> (storageB world [:game :state])
   ;;     (fj/changes)
   ;;     (fj/filterE #(= :starting-round %))

@@ -13,6 +13,7 @@
   (.apply (.-log js/console) js/console
           (into-array (map to-string args))))
 
+
 (defn logE [e]
   (fj/mapE log e)
   e)
@@ -25,21 +26,22 @@
              (.sendEvent es data)))
     (fj/startsWith es init)))
 
-
 (defn storeB [b world path]
   (let [current (fj/valueNow b)
         es (fj/changes b)]
     (me/assoc-in world path current)
     (.mapE es #(me/assoc-in world path %))))
 
-
-(defn atomB [data]
-  (let [init @data
-        es (fj/receiverE)]
-    (add-watch atom "should-be-unique?"
-               (fn [key ref old new]
-                 (.sendEvent es new)))
-    (fj/startsWith es init)))
+(defn atomB
+  ([atom path]
+     (let [init (get-in @atom path)
+           es (fj/receiverE)]
+       (add-watch atom "should-be-unique?"
+                  (fn [key ref old new]
+                    (.sendEvent es (get-in new path))))
+       (fj/startsWith es init)))
+  ([atom]
+     (atomB atom [])))
 
 
 (defn narrowB [b path]
