@@ -38,7 +38,9 @@
            es (fj/receiverE)]
        (add-watch atom "should-be-unique?"
                   (fn [key ref old new]
-                    (.sendEvent es (get-in new path))))
+                    ;; flapjax has no notion of 'identical data' :(
+                    (if (not= (get-in old path) (get-in new path))
+                      (.sendEvent es (get-in new path)))))
        (fj/startsWith es init)))
   ([atom]
      (atomB atom [])))

@@ -33,11 +33,9 @@
   ;;     (fj/filterE #(<= 3 (count (me/get-in @world [:game :players]))))
   ;;     (.mapE #(me/assoc-in world [:game :state] :starting-round)))
 
-
-  ;; argh this is wrong and causes recursion
-  ;; also flapjax is a bit of a flopjax
   (-> (atomB world [:game :form :add-player])
       (.liftB (fn [data]
+                (log data)
                 (when data
                   (me/update-in world [:game :players] conj
                                 (me/get-in @world [:game :form :name]))
