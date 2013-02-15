@@ -40,15 +40,25 @@
 ;; idea for the future: supply [optional] set of keys to identify items in list,
 ;; so that it's possible to track re-ordering to minimize reflow/rendering/etc
 (defproc list [el b item-template]
+  (.liftB b
+          #(log "LIST CHANGE" %)
+          )
   (let [countB (fj/liftB count b)]
     (fj/liftB
      (fn [n]
+       (log "COUNT CHANGE" n (fj/valueNow b))
        ;; TODO: this is of course not fun at all, at the very
        ;; minimum it should not delete elements which are still
        ;; used
        (aset el "innerHTML" "")
        (doseq [i (range n)
-               :let [itemB (fj/liftB #(nth % i) b)]]
+               :let [itemB (fj/liftB
+                            (fn [data]
+                              #_ (log n i el data b)
+                              i
+                              ;; NOTE: uncomment here to see it failing
+                              #_ (nth data i))
+                            b)]]
          (.appendChild el (item-template itemB))))
      countB)))
 
@@ -73,7 +83,7 @@
 
 (em/deftemplate setup-form :compiled "templates/setup-form.html"
   [gameB]
-  ["[name=name]"] (value (narrowB gameB [:name])))
+  ["[name=name]"] (value (narrowB gameB [:name] "")))
 
 (em/deftemplate game-setup :compiled "templates/game-setup.html"
   [gameB form]

@@ -1,8 +1,7 @@
 (ns ^{:doc "Pairwords entry point"}
   pairwords.core
   (:require [flapjax :as fj]
-            [solovyov.mesto :as me]
-            [pairwords.util :refer [log logE storageB storeB finiteTimerB]]
+            [pairwords.util :refer [log logE finiteTimerB]]
             [pairwords.game :refer [init-game]]))
 
 (def world (atom {}))
@@ -27,10 +26,10 @@
       (logE)))
 
 (defn ^:export run []
-  (me/on world []
-         (fn [d p] (.log js/console
-                         (pr-str (dissoc d :handlers))
-                         (pr-str p))))
+  (add-watch world :all
+             (fn [a k o n]
+               #_ (.trace js/console)
+               (.log js/console (pr-str n))))
 
   (text-show-hide)
   (init-game world)

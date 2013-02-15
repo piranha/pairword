@@ -1,53 +1,42 @@
 (ns pairwords.util
-  (:require [solovyov.mesto :as me]
-            [flapjax :as fj]))
+  (:require [flapjax :as fj]))
 
-
-(defn- to-string [obj]
-  (if (and (satisfies? cljs.core.ISeqable obj)
-           (not (instance? js/String obj)))
-    (pr-str obj)
-    obj))
 
 (defn log [& args]
   (.apply (.-log js/console) js/console
-          (into-array (map to-string args))))
+          (into-array (map clj->js args))))
 
 
 (defn logE [e]
   (fj/mapE log e)
   e)
 
-(defn storageB [world path]
-  (let [init (me/get-in @world path)
-        es (fj/receiverE)]
-    (me/on world path
-           (fn [data path]
-             (.sendEvent es data)))
-    (fj/startsWith es init)))
+(let [atom-id (atom 0)]
+  (defn atomB
+    ([atom path]
+       (let [init (get-in @atom path)
+             es (fj/receiverE)]
+         (add-watch atom (swap! atom-id inc)
+                    (fn [key ref old new]
+                      (log "update"
+                           (if (= new @ref) "expected" "NOT expected"))
+                      (log "old" (pr-str old))
+                      (log "new" (pr-str new))
+                      (log "ref" (pr-str @ref))
+                      (let [old (get-in old path)
+                            new (get-in new path)]
+                        ;; flapjax has no notion of 'identical data' :(
+                        (if (not= old new)
+                          (.sendEvent es new)))))
+         (fj/startsWith es init)))
+    ([atom]
+       (atomB atom []))))
 
-(defn storeB [b world path]
-  (let [current (fj/valueNow b)
-        es (fj/changes b)]
-    (me/assoc-in world path current)
-    (.mapE es #(me/assoc-in world path %))))
-
-(defn atomB
-  ([atom path]
-     (let [init (get-in @atom path)
-           es (fj/receiverE)]
-       (add-watch atom "should-be-unique?"
-                  (fn [key ref old new]
-                    ;; flapjax has no notion of 'identical data' :(
-                    (if (not= (get-in old path) (get-in new path))
-                      (.sendEvent es (get-in new path)))))
-       (fj/startsWith es init)))
-  ([atom]
-     (atomB atom [])))
-
-
-(defn narrowB [b path]
-  (fj/liftB #(get-in % path) b))
+(defn narrowB
+  ([b path]
+     (fj/liftB #(get-in % path) b))
+  ([b path not-found]
+     (fj/liftB #(get-in % path not-found) b)))
 
 
 ;; идея - бехавиор всë время фолс, после ивента и еще 1 мс (минимальный

@@ -1,7 +1,6 @@
 (ns pairwords.game
-  (:require [solovyov.mesto :as me]
-            [flapjax :as fj]
-            [pairwords.util :refer [logE storageB popValueOnEventE finiteTimerB
+  (:require [flapjax :as fj]
+            [pairwords.util :refer [logE popValueOnEventE finiteTimerB
                                     appendTo log narrowB atomB]]
             [pairwords.templates :refer [list2li msec2str player-list-template
                                          player-list-templateB]
@@ -10,12 +9,15 @@
 (def game-length 2000) ; milliseconds
 
 (defn next-players [world]
-  (take 2 (me/get-in @world [:game :players])))
+  (take 2 (me/get-in @world [:players])))
 
 (defn init-game [world]
-  (me/assoc-in world [:game :players] [])
-  (me/assoc-in world [:game :state] :entering-players)
-  (me/assoc-in world [:game :form] {:name ""})
+  (reset! world {:players []
+                 :state :entering-players})
+  ;; (me/assoc-in world [] {:players []
+  ;;                        :state :entering-players})
+  ;; (me/assoc-in world [:players] [])
+  ;; (me/assoc-in world [:state] :entering-players)
 
   ;;; INFO
 
@@ -33,20 +35,21 @@
   ;;     (fj/filterE #(<= 3 (count (me/get-in @world [:game :players]))))
   ;;     (.mapE #(me/assoc-in world [:game :state] :starting-round)))
 
-  (-> (atomB world [:game :form :add-player])
+  (-> (atomB world [:form :add-player])
       (.liftB (fn [data]
                 (log data)
                 (when data
-                  (me/update-in world [:game :players] conj
-                                (me/get-in @world [:game :form :name]))
-                  (me/assoc-in world [:game :form :name] "")))))
+                  (swap! world update-in [:players] conj
+                         (get-in @world [:form :name]))
+                  #_ (swap! world assoc-in [:form] {})
+                  ))))
 
-  (let [gameB (storageB world [:game])
-        form (t/setup-form (narrowB gameB [:form]))
+  (let [gameB (atomB world)
+        form (t/setup-form (narrowB gameB [:form] {}))
         formB (t/setup-form-b form)
         frag (t/game gameB form)]
 
-    (fj/liftB #(me/assoc-in world [:game :form] %) formB)
+    (fj/liftB #(swap! world assoc-in [:form] %) formB)
     (appendTo "game" frag))
 
   ;; (-> (storageB world [:game :state])
