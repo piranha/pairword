@@ -24,7 +24,7 @@
   (let [form (j/setup-form (cell (world :form {})))
         formC (j/setup-form-c form)
         frag (j/game world form)]
-    (cell (#(swap! world assoc-in [:form] %) formC))
+    (cell (swap! '(cell world) assoc-in [:form] formC))
     (appendTo "game" frag)))
 
 
