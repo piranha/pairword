@@ -1,23 +1,37 @@
 (ns pairwords.game
+  (:require-macros [tailrecursion.javelin.macros :refer [cell]])
   (:require [flapjax :as fj]
+            [tailrecursion.javelin]
             [pairwords.util :refer [logE popValueOnEventE finiteTimerB
                                     appendTo log narrowB atomB]]
             [pairwords.templates :refer [list2li msec2str player-list-template
                                          player-list-templateB]
-             :as t]))
+             :as t]
+            [pairwords.tempjave :as j]))
 
 (def game-length 2000) ; milliseconds
 
 (defn next-players [world]
   (take 2 (me/get-in @world [:players])))
 
+
+(defn init-jave [world]
+  (reset! world {:players []
+                 :state :entering-players})
+
+  (cell (log world))
+
+  (let [form (j/setup-form (cell (world :form {})))
+        formC (j/setup-form-c form)
+        frag (j/game world form)]
+    (cell (assoc-in world [:form] formC))
+    (cell (log formC))
+    (appendTo "game" frag)))
+
+
 (defn init-game [world]
   (reset! world {:players []
                  :state :entering-players})
-  ;; (me/assoc-in world [] {:players []
-  ;;                        :state :entering-players})
-  ;; (me/assoc-in world [:players] [])
-  ;; (me/assoc-in world [:state] :entering-players)
 
   ;;; INFO
 

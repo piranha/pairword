@@ -1,10 +1,13 @@
 (ns ^{:doc "Pairwords entry point"}
   pairwords.core
+  (:require-macros [tailrecursion.javelin.macros :refer [cell]])
   (:require [flapjax :as fj]
+            [tailrecursion.javelin]
             [pairwords.util :refer [log logE finiteTimerB]]
-            [pairwords.game :refer [init-game]]))
+            [pairwords.game :refer [init-game init-jave]]))
 
 (def world (atom {}))
+(def qorld (cell '{}))
 
 (defn prevent-default [es]
   (fj/mapE #(do (.preventDefault %) %) es))
@@ -32,5 +35,10 @@
                (.log js/console (pr-str n))))
 
   (text-show-hide)
-  (init-game world)
+  #_ (init-game world)
+  (init-jave qorld)
   (log "I'm running!"))
+
+(defn qwe []
+  (swap! qorld assoc-in [:state] :tralala)
+  (log @qorld))

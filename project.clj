@@ -2,7 +2,8 @@
   :description "Explaining words in pairs"
   :plugins [[lein-cljsbuild "0.3.0" :hooks false]]
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [enfocus "1.0.0-beta3"]]
+                 [enfocus "1.0.0-beta3"]
+                 [tailrecursion/javelin "1.0.0-SNAPSHOT"]]
   :cljsbuild
   {:builds
    [{:id "main"
