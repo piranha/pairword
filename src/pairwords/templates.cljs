@@ -22,11 +22,11 @@
   (cell (apply insert! el data fields)))
 
 (defproc list [el data item-template]
-  (cell ((fn [count]
+  (cell ((fn [cnt]
            ;; TODO: maybe do not erase here and instead track elements
            ;; but no ideas how to do that right now
            (insert! el "" "innerHTML")
-           (doseq [i (range count)
+           (doseq [i (range cnt)
                    :let [itemC (cell (nth data i))]]
              (.appendChild el (item-template itemC))))
          (count data))))
