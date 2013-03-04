@@ -1,13 +1,8 @@
 (ns pairwords.game
   (:require-macros [tailrecursion.javelin.macros :refer [cell]])
-  (:require [flapjax :as fj]
-            [tailrecursion.javelin]
-            [pairwords.util :refer [logE popValueOnEventE finiteTimerB
-                                    appendTo log narrowB atomB]]
-            [pairwords.templates :refer [list2li msec2str player-list-template
-                                         player-list-templateB]
-             :as t]
-            [pairwords.tempjave :as j]))
+  (:require [tailrecursion.javelin]
+            [pairwords.util :refer [appendTo log]]
+            [pairwords.templates :as t]))
 
 (def game-length 2000) ; milliseconds
 
@@ -18,7 +13,7 @@
   (when value
     (action)))
 
-(defn init-jave [world]
+(defn init-game [world]
   (reset! world {:players []
                  :state :entering-players})
 
@@ -27,17 +22,19 @@
   (cell (on (get-in world [:form :add-player])
             #(do (swap! world update-in [:players] conj
                         (get-in @world [:form :name]))
-                 ;; why is this not working...
+                 ;; FIXME: this is not working
+                 ;; probably because we're in a middle of cell action
+                 ;; argh
                  (swap! world assoc-in [:form :name] "zxc"))))
 
-  (let [form (j/setup-form (cell (world :form {})))
-        formC (j/setup-form-c form)
-        frag (j/game world form)]
+  (let [form (t/setup-form (cell (world :form {})))
+        formC (t/setup-form-c form)
+        frag (t/game world form)]
     (cell (swap! '(cell world) assoc-in [:form] formC))
     (appendTo "game" frag)))
 
 
-(defn init-game [world]
+(defn init-old [world]
   (reset! world {:players []
                  :state :entering-players})
 
@@ -56,23 +53,6 @@
   ;; (-> (fj/clicksE "start-game")
   ;;     (fj/filterE #(<= 3 (count (me/get-in @world [:game :players]))))
   ;;     (.mapE #(me/assoc-in world [:game :state] :starting-round)))
-
-  (-> (atomB world [:form :add-player])
-      (.liftB (fn [data]
-                (log data)
-                (when data
-                  (swap! world update-in [:players] conj
-                         (get-in @world [:form :name]))
-                  #_ (swap! world assoc-in [:form] {})
-                  ))))
-
-  (let [gameB (atomB world)
-        form (t/setup-form (narrowB gameB [:form] {}))
-        formB (t/setup-form-b form)
-        frag (t/game gameB form)]
-
-    (fj/liftB #(swap! world assoc-in [:form] %) formB)
-    (appendTo "game" frag))
 
   ;; (-> (storageB world [:game :state])
   ;;     (fj/changes)
