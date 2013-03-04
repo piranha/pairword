@@ -38,3 +38,6 @@
   #_ (init-game world)
   (init-jave qorld)
   (log "I'm running!"))
+
+(defn qwe []
+  (swap! qorld assoc-in [:players 0] "harhar"))

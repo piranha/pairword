@@ -14,12 +14,21 @@
 (defn next-players [world]
   (take 2 (me/get-in @world [:players])))
 
+(defn on [value action]
+  (when value
+    (action)))
 
 (defn init-jave [world]
   (reset! world {:players []
                  :state :entering-players})
 
   (cell (log world))
+
+  (cell (on (get-in world [:form :add-player])
+            #(do (swap! world update-in [:players] conj
+                        (get-in @world [:form :name]))
+                 ;; why is this not working...
+                 (swap! world assoc-in [:form :name] "zxc"))))
 
   (let [form (j/setup-form (cell (world :form {})))
         formC (j/setup-form-c form)

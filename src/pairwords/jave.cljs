@@ -18,7 +18,7 @@
   element. 'field' defaults to 'value'. Provided additional 'fields', inserts
   the value at the specified path a-la assoc-in."
   ([elem s]
-     (insert! elem s "value"))
+     (insert! elem s "innerHTML"))
   ([elem s field & fields]
      (aset-in elem (list* field fields) s)))
 
@@ -74,11 +74,14 @@
   (let [default (if (seq ks) (get-in @backbone ks) @backbone)
         parsers {:string identity
                  :float (partial parse-float default)
-                 :int (partial parse-int default)}
+                 :int (partial parse-int default)
+                 :bool (constantly true)}
         parser (parsers type)
         update! #(if (seq ks)
                    (swap! backbone assoc-in ks %)
-                   (reset! backbone %))]
+                   (reset! backbone %))
+        listener #(let [value (parser (form/getValue elem))]
+                    (update! (if (validator value) value default)))]
 
     (validator default)
 
@@ -86,11 +89,22 @@
       (insert! elem (str default)))
 
     (doseq [t triggers]
-      (event/listen elem
-                    t
-                    #(let [value (parser (form/getValue elem))]
-                       (update! (if (validator value) value default)))))))
+      (event/listen elem t listener))))
 
+(defn click-to
+  [backbone ks elem
+   & {:keys [triggers]
+      :or {triggers #{"click"}}}]
+
+  (let [update! #(if (seq ks)
+                   (swap! backbone assoc-in ks %)
+                   (reset! backbone %))
+        listener (fn [e]
+                   (update! true)
+                   (js/requestAnimationFrame #(update! false)))]
+
+    (doseq [t triggers]
+      (event/listen elem t listener))))
 
 (defn form-cell
   "Creates and returns a cell backed by the form input element.

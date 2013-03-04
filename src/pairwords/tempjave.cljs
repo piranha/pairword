@@ -5,7 +5,8 @@
                    [pairwords.macros :refer [defproc]])
   (:require [tailrecursion.javelin]
             [domina.css :as css]
-            [pairwords.jave :refer [insert! input-to form-cell]]))
+            [pairwords.util :refer [log]]
+            [pairwords.jave :refer [insert! input-to click-to form-cell]]))
 
 
 (defn sel
@@ -17,9 +18,21 @@
 (defproc append [el fragment]
   (.appendChild el fragment))
 
-(defproc attr [el data field]
-  (cell (insert! el data field)))
+(defproc attr [el data & fields]
+  (cell (apply insert! el data fields)))
 
+(defn gen-list-cells [data]
+  (map #(cell %) data))
+
+(defproc list [el data item-template]
+  (cell ((fn [count]
+           ;; TODO: maybe do not erase here and instead track elements
+           ;; but no ideas how to do that right now
+           (insert! el "" "innerHTML")
+           (doseq [i (range count)
+                   :let [itemC (cell (nth data i))]]
+             (.appendChild el (item-template itemC))))
+         (count data))))
 
 ;;; state
 
@@ -30,6 +43,16 @@
 
 ;;; setup
 
+(em/deftemplate player :compiled "templates/player.html"
+  [playerC]
+  ["li"] (attr playerC "innerHTML"))
+
+(em/deftemplate player-list :compiled "templates/player-list.html"
+  [playersC]
+  [".count"] (attr (cell (count playersC)))
+  ["ul"] (list playersC player)
+  )
+
 (em/deftemplate setup-form :compiled "templates/setup-form.html"
   [gameC]
   ["[name=name]"] (attr (cell (gameC :name "")) "value"))
@@ -38,13 +61,17 @@
   [frag]
   (let [form (cell '{:name ""})]
     (input-to form [:name] (sel frag "[name=name]"))
-    (input-to form [:add-player] (sel frag "[name=add]") :triggers #{"click"})
-    (input-to form [:start-game] (sel frag "[name=start]") :triggers #{"click"})
+    (click-to form [:add-player] (sel frag "[name=add]"))
+    (click-to form [:start-game] (sel frag "[name=start]"))
 
     form))
 
 (em/deftemplate game-setup :compiled "templates/game-setup.html"
   [gameC form]
+  [":first-child"] (attr
+                    (cell (if (= (gameC :state) :entering-players) "block" "none"))
+                    "style" "display")
+  [".game-setup"] (append (player-list (cell (gameC :players))))
   [".game-setup"] (append form))
 
 (em/deftemplate game :compiled "templates/game.html"
