@@ -1,9 +1,10 @@
-(ns pairwords.tempjave
+(ns pairwords.templates
   (:refer-clojure :exclude [list])
   (:require-macros [tailrecursion.javelin.macros :refer [cell]]
                    [enfocus.macros :as em]
                    [pairwords.macros :refer [defproc]])
   (:require [tailrecursion.javelin]
+            [enfocus.core]
             [domina.css :as css]
             [pairwords.util :refer [log]]
             [pairwords.jave :refer [insert! input-to click-to form-cell]]))
@@ -31,6 +32,7 @@
              (.appendChild el (item-template itemC))))
          (count data))))
 
+
 ;;; state
 
 (em/deftemplate game-state :compiled "templates/game-state.html"
@@ -47,8 +49,7 @@
 (em/deftemplate player-list :compiled "templates/player-list.html"
   [playersC]
   [".count"] (attr (cell (count playersC)))
-  ["ul"] (list playersC player)
-  )
+  ["ul"] (list playersC player))
 
 (em/deftemplate setup-form :compiled "templates/setup-form.html"
   [gameC]
