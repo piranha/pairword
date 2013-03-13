@@ -67,6 +67,7 @@
 (em/deftemplate game-setup :compiled "templates/game-setup.html"
   [gameC form]
   [":first-child"] (attr
+                    ;; это не очень прикольно, надо какой-то массив сделать, наверное
                     (cell (if (= (gameC :state) :entering-players) "block" "none"))
                     "style" "display")
   [".game-setup"] (append (player-list (cell (gameC :players))))

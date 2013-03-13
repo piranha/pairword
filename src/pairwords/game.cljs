@@ -20,12 +20,17 @@
   (cell (log world))
 
   (cell (on (get-in world [:form :add-player])
-            #(do (swap! world update-in [:players] conj
-                        (get-in @world [:form :name]))
-                 ;; FIXME: this is not working
-                 ;; probably because we're in a middle of cell action
-                 ;; argh
-                 (swap! world assoc-in [:form :name] "zxc"))))
+            #(let [player (get-in @world [:form :name])]
+               (if player
+                 (swap! world update-in [:players] conj player))
+               ;; FIXME: this is not working
+               ;; probably because we're in a middle of cell action
+               (swap! world assoc-in [:form :name] "zxc"))))
+
+  (cell (on (get-in world [:form :start-game])
+            #(let [players (get-in @world [:players])]
+               (if (>= (count players) 3)
+                 (swap! world assoc-in [:state] :starting-round)))))
 
   (let [form (t/setup-form (cell (world :form {})))
         formC (t/setup-form-c form)
@@ -35,31 +40,6 @@
 
 
 (defn init-old [world]
-  (reset! world {:players []
-                 :state :entering-players})
-
-  ;;; INFO
-
-  ;;; SETUP
-
-  ;; (-> (fj/mergeE
-  ;;      (fj/clicksE "add-player")
-  ;;      (-> (fj/extractEventE "name-input" "keyup")
-  ;;          (fj/filterE #(= (.-keyCode %) 13))))
-  ;;     (popValueOnEventE "name-input")
-  ;;     (fj/filterE #(not= % "")) ; filters empty inputs
-  ;;     (.mapE #(me/update-in world [:game :players] conj %)))
-
-  ;; (-> (fj/clicksE "start-game")
-  ;;     (fj/filterE #(<= 3 (count (me/get-in @world [:game :players]))))
-  ;;     (.mapE #(me/assoc-in world [:game :state] :starting-round)))
-
-  ;; (-> (storageB world [:game :state])
-  ;;     (fj/changes)
-  ;;     (fj/filterE #(= :starting-round %))
-  ;;     (.mapE #(list2li (next-players world)))
-  ;;     (fj/insertValueE "current-players" "innerHTML"))
-
   ;; (-> (fj/clicksE "start-round")
   ;;     (fj/filterE #(= :starting-round (me/get-in @world [:game :state])))
   ;;     (.mapE #(do (me/assoc-in world [:game :state] :round)

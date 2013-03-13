@@ -12,4 +12,4 @@
   (log "I'm running!"))
 
 (defn qwe []
-  (swap! world assoc-in [:players 0] "harhar"))
+  (swap! world assoc-in [:form :name] "test"))
